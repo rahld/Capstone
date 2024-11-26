@@ -1,0 +1,43 @@
+data <- read.csv("./data/online_shoppers_intention.csv")
+str(data)
+
+#결측값
+table(is.na(data))
+
+#이상값
+boxplot(data$ProductRelated_Duration)
+data <- data[data$ProductRelated_Duration < 40000, ]
+data
+
+outliers <- data[data < lower_bound | data > upper_bound]
+print(outliers)
+
+Q1 <- quantile(data$ProductRelated_Duration, 0.25)
+Q3 <- quantile(data$ProductRelated_Duration, 0.75)
+IQR_value <- IQR(data$ProductRelated_Duration)
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+outliers_data <- data[data$ProductRelated_Duration < lower_bound | data$ProductRelated_Duration > 20000, ]
+length(outliers)
+outliers
+
+a <- a[, -c(10:15, 17)]
+
+unique_values <- unique(a$Revenue)
+as.factor(a$Revenue)
+
+library(randomForest)
+train_index <- sample(1:nrow(a), size = round(nrow(a) * 0.8))
+train_set <- a[train_index, ]
+test_set <- a[-train_index, ]
+rf <- randomForest(as.factor(Revenue) ~., data=train_set, ntree = 500)
+summary(rf)
+print(rf)
+importance(rf)
+varImpPlot(rf)
+varImpPlot(rf, main = "Variable Importance")
+
+library(dplyr)
+train_set <- train_set %>% select(-VisitorType, -Informational, -Informational_Duration)
+rf <- randomForest(as.factor(Revenue) ~ ., data = train_set, ntree = 500)
+print(rf)
